@@ -1,11 +1,22 @@
 const database = require("../../infra/database.js");
 
 async function getProductName(req, res) {
-  const { name } = req.params;
+  let { name } = req.params;
+  if (!name) {
+    return res.status(400).json({ message: "Nome do produto não fornecido." });
+  }
+
+  name = name.trim();
+
   try {
-    // Buscar produtos pelo nome (case-insensitive)
     const productsResult = await database.query({
-      text: "SELECT * FROM products WHERE LOWER(name) = LOWER($1);",
+      text: `
+        SELECT p.*, s.name AS size_name, c.name AS category_name
+        FROM products p
+        LEFT JOIN sizes s ON p.size_id = s.id
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE LOWER(TRIM(p.name)) = LOWER($1);
+      `,
       values: [name],
     });
 

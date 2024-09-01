@@ -32,7 +32,7 @@ app.delete("/products", async (req, res) => {
   await deleteProduct(req, res);
 });
 
-app.put("/products", async (req, res) => {
+app.put("/products/:name", async (req, res) => {
   await updateProductData(req, res);
 });
 

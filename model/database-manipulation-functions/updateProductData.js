@@ -2,7 +2,6 @@ const database = require("../../infra/database.js");
 
 async function updateProductData(req, res) {
   const {
-    name,
     new_name,
     image_url,
     description,
@@ -12,10 +11,14 @@ async function updateProductData(req, res) {
     size_name,
   } = req.body;
 
+  // Pegando o nome do produto do parâmetro da URL e aplicando TRIM
+  let { name } = req.params;
+  name = name.trim();
+
   try {
-    // Buscar o produto pelo nome (case-insensitive)
+    // Buscar o produto pelo nome (case-insensitive e ignorando espaços)
     const productResult = await database.query({
-      text: "SELECT * FROM products WHERE LOWER(name) = LOWER($1);",
+      text: "SELECT * FROM products WHERE LOWER(TRIM(name)) = LOWER($1);",
       values: [name],
     });
 
@@ -28,8 +31,8 @@ async function updateProductData(req, res) {
 
     if (category_name) {
       const categoryResult = await database.query({
-        text: "SELECT id FROM categories WHERE LOWER(name) = LOWER($1);",
-        values: [category_name],
+        text: "SELECT id FROM categories WHERE LOWER(TRIM(name)) = LOWER($1);",
+        values: [category_name.trim()],
       });
 
       if (categoryResult.rows.length > 0) {
@@ -44,8 +47,8 @@ async function updateProductData(req, res) {
 
     if (size_name) {
       const sizeResult = await database.query({
-        text: "SELECT id FROM sizes WHERE LOWER(name) = LOWER($1);",
-        values: [size_name],
+        text: "SELECT id FROM sizes WHERE LOWER(TRIM(name)) = LOWER($1);",
+        values: [size_name.trim()],
       });
 
       if (sizeResult.rows.length > 0) {
@@ -67,12 +70,12 @@ async function updateProductData(req, res) {
           price = $6,
           category_id = $7,
           size_id = $8
-        WHERE LOWER(name) = LOWER($1)
+        WHERE LOWER(TRIM(name)) = LOWER($1)
         RETURNING *;
       `,
       values: [
         name,
-        new_name || productResult.rows[0].name,
+        new_name ? new_name.trim() : productResult.rows[0].name,
         image_url || productResult.rows[0].image_url,
         description || productResult.rows[0].description,
         quantity || productResult.rows[0].quantity,

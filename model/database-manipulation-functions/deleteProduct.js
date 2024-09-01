@@ -1,10 +1,16 @@
 const database = require("../../infra/database.js");
 
 async function deleteProduct(req, res) {
-  const { name } = req.body;
+  let { name } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ message: "Nome do produto não fornecido." });
+  }
+
+  name = name.trim();
   try {
     const result = await database.query({
-      text: "DELETE FROM products WHERE name = $1;",
+      text: "DELETE FROM products WHERE LOWER(TRIM(name)) = LOWER($1);",
       values: [name],
     });
 
