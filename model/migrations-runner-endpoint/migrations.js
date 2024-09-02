@@ -1,5 +1,5 @@
 const { runner } = require("node-pg-migrate");
-const { join } = require("node:path");
+const path = require("path");
 const database = require("../../infra/database.js");
 
 async function runnerMigrations(req, res) {
@@ -7,7 +7,7 @@ async function runnerMigrations(req, res) {
   const defaultMigrationOptions = {
     dbClient: dbClient,
     dryRun: true,
-    dir: join("infra", "migrations"),
+    dir: path.join(__dirname, "..", "..", "infra", "migrations"),
     direction: "up",
     verbose: true,
     migrationsTable: "pgmigrations",
